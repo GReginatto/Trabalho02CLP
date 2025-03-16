@@ -2,9 +2,9 @@
 
 # Integrantes do Grupo
 
-- Gustavo Reginatto
-- Lucas Ludwig
-- Sandro Júnior
+- [Gustavo Reginatto](https://github.com/GReginatto)
+- [Lucas Ludwig](https://github.com/lucas26042002)
+- [Sandro Júnior](https://github.com/SandJunior)
 
 # Objetivo
 

@@ -19,7 +19,7 @@ Este projeto tem como objetivo comparar as linguagens C, Rust e Golang, implemen
 
 # Metodologia
 
-1 - [Recuperamos uma implementação do algoritmo de Eliminação de Gauss em C.] (https://github.com/gmendonca/gaussian-elimination-pthreads-openmp/blob/master/gauss.c)
+1 - [Recuperamos uma implementação do algoritmo de Eliminação de Gauss em C.](https://github.com/gmendonca/gaussian-elimination-pthreads-openmp/blob/master/gauss.c)
 
 2 - Reimplementamos o mesmo algoritmo em Rust e Golang.
 

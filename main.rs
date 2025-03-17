@@ -1,64 +1,64 @@
 use std::env;
 use rand::Rng;
 
-const MAXN: usize = 2000;
+const TAMANHO_MAXIMO: usize = 2000;
 
-fn initialize_inputs(n: usize) -> (Vec<Vec<f32>>, Vec<f32>) {
+fn inicializar_matrizes(tamanho: usize) -> (Vec<Vec<f32>>, Vec<f32>) {
     let mut rng = rand::thread_rng();
-    let mut a = vec![vec![0.0; n]; n];
-    let mut b = vec![0.0; n];
+    let mut matriz = vec![vec![0.0; tamanho]; tamanho];
+    let mut vetor_independente = vec![0.0; tamanho];
 
-    for i in 0..n {
-        for j in 0..n {
-            a[i][j] = rng.gen::<f32>();
+    for i in 0..tamanho {
+        for j in 0..tamanho {
+            matriz[i][j] = rng.gen::<f32>();
         }
-        b[i] = rng.gen::<f32>();
+        vetor_independente[i] = rng.gen::<f32>();
     }
 
-    (a, b)
+    (matriz, vetor_independente)
 }
 
-fn gauss(n: usize, mut a: Vec<Vec<f32>>, mut b: Vec<f32>) -> Vec<f32> {
-    let mut x = vec![0.0; n];
+fn eliminacao_gaussiana(tamanho: usize, mut matriz: Vec<Vec<f32>>, mut vetor_independente: Vec<f32>) -> Vec<f32> {
+    let mut vetor_resultado = vec![0.0; tamanho];
 
-    for norm in 0..n-1 {
-        for row in norm+1..n {
-            let multiplier = a[row][norm] / a[norm][norm];
-            for col in norm..n {
-                a[row][col] -= a[norm][col] * multiplier;
+    for norma in 0..tamanho - 1 {
+        for linha in norma + 1..tamanho {
+            let fator = matriz[linha][norma] / matriz[norma][norma];
+            for coluna in norma..tamanho {
+                matriz[linha][coluna] -= matriz[norma][coluna] * fator;
             }
-            b[row] -= b[norm] * multiplier;
+            vetor_independente[linha] -= vetor_independente[norma] * fator;
         }
     }
 
-    for row in (0..n).rev() {
-        x[row] = b[row];
-        for col in row+1..n {
-            x[row] -= a[row][col] * x[col];
+    for linha in (0..tamanho).rev() {
+        vetor_resultado[linha] = vetor_independente[linha];
+        for coluna in linha + 1..tamanho {
+            vetor_resultado[linha] -= matriz[linha][coluna] * vetor_resultado[coluna];
         }
-        x[row] /= a[row][row];
+        vetor_resultado[linha] /= matriz[linha][linha];
     }
 
-    x
+    vetor_resultado
 }
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    if args.len() < 2 {
-        eprintln!("Uso: {} <tamanho da matriz>", args[0]);
+    let argumentos: Vec<String> = env::args().collect();
+    if argumentos.len() < 2 {
+        eprintln!("Uso: {} <tamanho da matriz>", argumentos[0]);
         return;
     }
 
-    let n: usize = args[1].parse().expect("Por favor, insira um número válido");
-    if n < 1 || n > MAXN {
-        eprintln!("Tamanho inválido. Escolha entre 1 e {}", MAXN);
+    let tamanho: usize = argumentos[1].parse().expect("Por favor, insira um número válido");
+    if tamanho < 1 || tamanho > TAMANHO_MAXIMO {
+        eprintln!("Tamanho inválido. Escolha entre 1 e {}", TAMANHO_MAXIMO);
         return;
     }
 
-    let (a, b) = initialize_inputs(n);
-    let x = gauss(n, a, b);
+    let (matriz, vetor_independente) = inicializar_matrizes(tamanho);
+    let vetor_resultado = eliminacao_gaussiana(tamanho, matriz, vetor_independente);
 
-    if n < 100 {
-        println!("X = {:?}", x);
+    if tamanho < 100 {
+        println!("Vetor resultado: {:?}", vetor_resultado);
     }
 }

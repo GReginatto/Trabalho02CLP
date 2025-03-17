@@ -89,7 +89,7 @@ rustc main.rs -o gauss_rust
 
 #### **Executar**:
 ```sh
-./gauss_rust
+cargo run -- 10
 ```
 
 ### **Golang**

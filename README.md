@@ -106,7 +106,12 @@ go build gauss.go
 
 #### **Executar o binário compilado**:
 ```sh
+
+
 ./gauss
 ```
+
+# No caso de estar utilizando o VSCode.
+1 - Utilize a extensão chamada "CodeRunner", que compila e executa automaticamente para o usuário.
 
 

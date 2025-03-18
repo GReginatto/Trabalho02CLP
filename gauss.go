@@ -9,85 +9,96 @@ import (
 	"time"
 )
 
-const MAXIMO int = 200
+const MAXN int = 2000
 
-var matriz [MAXIMO][MAXIMO]float64
-var termosIndependentes [MAXIMO]float64
-var solucoes [MAXIMO]float64
-var tamanho int
-
-func gerarMatriz() {
+func initializeInputs(n int, a [][]float64, b []float64) {
 	rand.Seed(time.Now().UnixNano())
-	for i := 0; i < tamanho; i++ {
-		for j := 0; j < tamanho; j++ {
-			matriz[i][j] = rand.Float64() * 100
+	for i := 0; i < n; i++ {
+		for j := 0; j < n; j++ {
+			a[i][j] = rand.Float64()
 		}
-		termosIndependentes[i] = rand.Float64() * 100
+		b[i] = rand.Float64()
 	}
 }
 
-func eliminacaoGaussiana() {
-	for i := 0; i < tamanho; i++ {
-		pivo := matriz[i][i]
-		if math.Abs(pivo) < 1e-9 {
-			fmt.Println("Erro: pivô próximo de zero.")
-			return
-		}
-		for j := i; j < tamanho; j++ {
-			matriz[i][j] /= pivo
-		}
-		termosIndependentes[i] /= pivo
-
-		for k := i + 1; k < tamanho; k++ {
-			fator := matriz[k][i]
-			for j := i; j < tamanho; j++ {
-				matriz[k][j] -= fator * matriz[i][j]
+func gauss(n int, a [][]float64, b, x []float64) {
+	for norm := 0; norm < n-1; norm++ {
+		for row := norm + 1; row < n; row++ {
+			multiplier := a[row][norm] / a[norm][norm]
+			for col := norm; col < n; col++ {
+				a[row][col] -= a[norm][col] * multiplier
 			}
-			termosIndependentes[k] -= fator * termosIndependentes[i]
+			b[row] -= b[norm] * multiplier
 		}
 	}
-
-	for i := tamanho - 1; i >= 0; i-- {
-		solucoes[i] = termosIndependentes[i]
-		for j := i + 1; j < tamanho; j++ {
-			solucoes[i] -= matriz[i][j] * solucoes[j]
+	for row := n - 1; row >= 0; row-- {
+		x[row] = b[row]
+		for col := row + 1; col < n; col++ {
+			x[row] -= a[row][col] * x[col]
 		}
+		x[row] /= a[row][row]
 	}
-}
-
-func imprimirMatriz() {
-	fmt.Println("Matriz aumentada:")
-	for i := 0; i < tamanho; i++ {
-		for j := 0; j < tamanho; j++ {
-			fmt.Printf("%.2f ", matriz[i][j])
-		}
-		fmt.Printf("| %.2f\n", termosIndependentes[i])
-	}
-	fmt.Println()
 }
 
 func main() {
-	if len(os.Args) != 2 {
-		fmt.Println("Uso: go run gauss.go <tamanho da matriz>")
-		return
+	var n int = 2000
+	if len(os.Args) > 1 {
+		if num, err := strconv.Atoi(os.Args[1]); err == nil {
+			n = num
+		}
+	}
+	a := make([][]float64, n)
+	for i := range a {
+		a[i] = make([]float64, n)
+	}
+	b := make([]float64, n)
+	x := make([]float64, n)
+
+	initializeInputs(n, a, b)
+
+	originalA := make([][]float64, n)
+	for i := range originalA {
+		originalA[i] = make([]float64, n)
+		copy(originalA[i], a[i])
+	}
+	originalB := make([]float64, n)
+	copy(originalB, b)
+
+	start := time.Now()
+	gauss(n, a, b, x)
+	fmt.Printf("Tempo decorrido: %v\n", time.Since(start))
+
+	fmt.Println("Matriz A:")
+	for i := 0; i < n; i++ {
+		fmt.Println(a[i])
 	}
 
-	tamanhoConvertido, err := strconv.Atoi(os.Args[1])
-	if err != nil || tamanhoConvertido <= 0 || tamanhoConvertido > MAXIMO {
-		fmt.Println("Erro: forneça um tamanho válido entre 1 e", MAXIMO)
-		return
+	fmt.Println("Vetor B:")
+	fmt.Println(b)
+
+	fmt.Println("Vetor Solução X:")
+	fmt.Println(x)
+
+	fmt.Println("Verificação (A * X):")
+	for i := 0; i < n; i++ {
+		sum := 0.0
+		for j := 0; j < n; j++ {
+			sum += originalA[i][j] * x[j]
+		}
+		fmt.Printf("Resultado[%d] = %v, Esperado[%d] = %v\n", i, sum, i, originalB[i])
 	}
+	fmt.Println("Verificação (A * X) com tolerância:")
 
-	tamanho = tamanhoConvertido
-
-	gerarMatriz()
-	fmt.Println("Matriz gerada aleatoriamente:")
-	imprimirMatriz()
-
-	eliminacaoGaussiana()
-
-	fmt.Println("Soluções do sistema:")
-	for i := 0; i < tamanho; i++ {
-		fmt.Printf("x%d = %.5f\n", i, solucoes[i])
+	tolerance := 1e-10
+	for i := 0; i < n; i++ {
+		sum := 0.0
+		for j := 0; j < n; j++ {
+			sum += originalA[i][j] * x[j]
+		}
+		if math.Abs(sum-originalB[i]) < tolerance {
+			fmt.Printf("Resultado[%d] = %v, Esperado[%d] = %v → CORRETO\n", i, sum, i, originalB[i])
+		} else {
+			fmt.Printf("Resultado[%d] = %v, Esperado[%d] = %v → INCORRETO\n", i, sum, i, originalB[i])
+		}
 	}
 }
